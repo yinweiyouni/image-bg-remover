@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
   deploy:
@@ -26,3 +23,5 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: image-bg-remover
           branch: main
+          directory: ./
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
