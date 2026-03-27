@@ -1,0 +1,11 @@
+name = "image-bg-remover-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[env.production]
+routes = [{ pattern = "api.image-bg-remover-xn3.pages.dev", zone_name = "image-bg-remover-xn3.pages.dev" }]
+
+[[d1_databases]]
+binding = "user_db"
+database_name = "user-db"
+database_id = "8d7ac785-f126-4866-ac13-3cecc2081774"

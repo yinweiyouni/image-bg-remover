@@ -12,6 +12,17 @@
 <body>
     <div class="container">
         <header class="header">
+            <div class="header-top">
+                <div class="auth-section" id="authSection">
+                    <button class="btn btn-login" id="loginBtn">登录</button>
+                    <div class="user-info" id="userInfo" style="display: none;">
+                        <img class="user-avatar" id="userAvatar" src="" alt="用户头像">
+                        <span class="user-name" id="userName"></span>
+                        <span class="usage-badge" id="usageBadge">剩余 5 次</span>
+                        <button class="btn btn-logout" id="logoutBtn">退出</button>
+                    </div>
+                </div>
+            </div>
             <h1 class="title">图片背景消除</h1>
             <p class="subtitle">AI-powered Background Remover</p>
         </header>

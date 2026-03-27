@@ -3,6 +3,10 @@
 (function() {
     'use strict';
 
+    // 配置
+    const API_BASE_URL = 'https://image-bg-remover-xn3.pages.dev';
+    const DAILY_LIMIT = 5;
+
     // DOM 元素
     const elements = {
         uploadArea: document.getElementById('uploadArea'),
@@ -18,12 +22,21 @@
         downloadBtn: document.getElementById('downloadBtn'),
         resetBtn: document.getElementById('resetBtn'),
         apiKeyInput: document.getElementById('apiKeyInput'),
-        saveApiKeyBtn: document.getElementById('saveApiKeyBtn')
+        saveApiKeyBtn: document.getElementById('saveApiKeyBtn'),
+        // 登录相关
+        loginBtn: document.getElementById('loginBtn'),
+        userInfo: document.getElementById('userInfo'),
+        userAvatar: document.getElementById('userAvatar'),
+        userName: document.getElementById('userName'),
+        usageBadge: document.getElementById('usageBadge'),
+        logoutBtn: document.getElementById('logoutBtn')
     };
 
     // 状态
     let currentFile = null;
     let processedBlob = null;
+    let currentUser = null;
+    let remainingUses = 0;
 
     // API Key 管理
     const API_KEY_STORAGE_KEY = 'remove_bg_api_key';
@@ -34,6 +47,120 @@
     function init() {
         loadApiKey();
         bindEvents();
+        checkAuthStatus();
+    }
+
+    /**
+     * 检查登录状态
+     */
+    async function checkAuthStatus() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/auth/status`, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (data.loggedIn && data.user) {
+                currentUser = data.user;
+                updateAuthUI(true);
+                await checkUsage();
+            } else {
+                updateAuthUI(false);
+            }
+        } catch (error) {
+            console.error('检查登录状态失败:', error);
+            updateAuthUI(false);
+        }
+    }
+
+    /**
+     * 更新登录 UI
+     */
+    function updateAuthUI(loggedIn) {
+        if (loggedIn) {
+            elements.loginBtn.style.display = 'none';
+            elements.userInfo.style.display = 'flex';
+            elements.userAvatar.src = currentUser.avatar || '';
+            elements.userName.textContent = currentUser.name || currentUser.email;
+        } else {
+            elements.loginBtn.style.display = 'block';
+            elements.userInfo.style.display = 'none';
+            currentUser = null;
+            remainingUses = 0;
+        }
+    }
+
+    /**
+     * 检查使用次数
+     */
+    async function checkUsage() {
+        if (!currentUser) return;
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/usage`, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (data.loggedIn) {
+                remainingUses = data.remaining;
+                elements.usageBadge.textContent = `剩余 ${remainingUses} 次`;
+            }
+        } catch (error) {
+            console.error('检查使用次数失败:', error);
+        }
+    }
+
+    /**
+     * 登录
+     */
+    function login() {
+        window.location.href = `${API_BASE_URL}/api/auth/login`;
+    }
+
+    /**
+     * 登出
+     */
+    async function logout() {
+        try {
+            await fetch(`${API_BASE_URL}/api/auth/logout`, {
+                credentials: 'include'
+            });
+            currentUser = null;
+            remainingUses = 0;
+            updateAuthUI(false);
+        } catch (error) {
+            console.error('登出失败:', error);
+        }
+    }
+
+    /**
+     * 使用一次 API（扣除次数）
+     */
+    async function useApi() {
+        if (!currentUser) {
+            alert('请先登录');
+            login();
+            return false;
+        }
+
+        if (remainingUses <= 0) {
+            alert('今日使用次数已用完，请明天再来');
+            return false;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/usage/use`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (data.success) {
+                remainingUses--;
+                elements.usageBadge.textContent = `剩余 ${remainingUses} 次`;
+                return true;
+            }
+        } catch (error) {
+            console.error('使用 API 失败:', error);
+        }
+        return false;
     }
 
     /**
@@ -79,6 +206,10 @@
         elements.downloadBtn.addEventListener('click', downloadImage);
         elements.resetBtn.addEventListener('click', resetApp);
         elements.saveApiKeyBtn.addEventListener('click', saveApiKey);
+
+        // 登录相关
+        elements.loginBtn.addEventListener('click', login);
+        elements.logoutBtn.addEventListener('click', logout);
     }
 
     /**
@@ -169,6 +300,18 @@
      * 消除背景
      */
     async function removeBackground() {
+        // 检查登录和使用次数
+        if (!currentUser) {
+            alert('请先登录');
+            login();
+            return;
+        }
+
+        if (remainingUses <= 0) {
+            alert('今日使用次数已用完，请明天再来');
+            return;
+        }
+
         const apiKey = elements.apiKeyInput.value.trim();
         if (!apiKey) {
             alert('请先输入并保存 Remove.bg API Key');
