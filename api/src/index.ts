@@ -7,7 +7,7 @@ export default {
 
     const GOOGLE_CLIENT_ID = "23518057491-97ufhj4s5lcra61o82b97vm61pr1hdot.apps.googleusercontent.com";
     const GOOGLE_CLIENT_SECRET = env.GOOGLE_CLIENT_SECRET;
-    const REDIRECT_URI = "https://image-bg-remover-api.ab1710492709.workers.dev/api/auth/callback";
+    const REDIRECT_URI = "https://api.image-bg-remover-xn3.pages.dev/api/auth/callback";
     const FRONTEND_URL = "https://image-bg-remover-xn3.pages.dev";
     const DAILY_LIMIT = 5;
 
