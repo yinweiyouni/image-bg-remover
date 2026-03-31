@@ -7,6 +7,10 @@ binding = "user_db"
 database_name = "user-db"
 database_id = "8d7ac785-f126-4866-ac13-3cecc2081774"
 
-[[routes]]
-pattern = "api.image-bg-remover-xn3.pages.dev/*"
-zone_name = "image-bg-remover-xn3.pages.dev"
+# PayPal 配置
+[vars]
+PAYPAL_MODE = "sandbox"
+
+# Secrets - 通过 wrangler secret put 设置
+# PAYPAL_CLIENT_ID
+# PAYPAL_CLIENT_SECRET
